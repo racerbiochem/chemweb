@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ionic Quest - Naming Ionic Compounds Mastery</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        chem: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        cation: '#3b82f6',
+                        anion: '#ec4899'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .chemical-formula sub {
+            font-size: 0.75em;
+            vertical-align: sub;
+            line-height: 0;
+        }
+        .chemical-formula sup {
+            font-size: 0.75em;
+            vertical-align: super;
+            line-height: 0;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        .dark .glass-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(55, 65, 81, 0.5);
+        }
+        .pulse-correct {
+            animation: pulse-green 0.5s cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        .pulse-wrong {
+            animation: pulse-red 0.5s cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        @keyframes pulse-green {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        /* Canvas background overlay for particle effects */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('quiz')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+                    <i class="fa-solid font-mono font-bold text-lg">🧪</i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-400 dark:to-indigo-400 bg-clip-text text-transparent">IonicQuest</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Naming Ionic Compounds Practice</p>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <nav class="hidden md:flex items-center space-x-1 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl">
+                <button id="nav-quiz" onclick="switchTab('quiz')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm">
+                    <i class="fa-solid fa-graduation-cap mr-2"></i>10-Q Quiz
+                </button>
+                <button id="nav-sandbox" onclick="switchTab('sandbox')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400">
+                    <i class="fa-solid fa-atom mr-2"></i>Formula Builder
+                </button>
+                <button id="nav-reference" onclick="switchTab('reference')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400">
+                    <i class="fa-solid fa-book-bookmark mr-2"></i>Ions Cheat Sheet
+                </button>
+            </nav>
+
+            <!-- Utility Controls -->
+            <div class="flex items-center space-x-2">
+                <button id="sound-btn" onclick="toggleSound()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition" title="Toggle Sound">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button id="theme-btn" onclick="toggleTheme()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition" title="Toggle Dark Mode">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom / Nav -->
+        <div class="flex md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-2 py-1 justify-around">
+            <button id="mob-nav-quiz" onclick="switchTab('quiz')" class="flex-1 py-2 text-center text-xs font-semibold text-sky-600 dark:text-sky-400">
+                <i class="fa-solid fa-graduation-cap block text-base mb-0.5"></i>Quiz
+            </button>
+            <button id="mob-nav-sandbox" onclick="switchTab('sandbox')" class="flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-atom block text-base mb-0.5"></i>Builder
+            </button>
+            <button id="mob-nav-reference" onclick="switchTab('reference')" class="flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-book-bookmark block text-base mb-0.5"></i>Cheat Sheet
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col justify-center">
+
+        <!-- VIEW 1: QUIZ SECTION -->
+        <section id="view-quiz" class="w-full transition-all duration-300">
+            
+            <!-- Quiz Start / Welcome Card -->
+            <div id="quiz-welcome" class="glass-card rounded-2xl p-6 sm:p-10 shadow-xl text-center max-w-2xl mx-auto border border-sky-100 dark:border-slate-800">
+                <div class="w-20 h-20 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white text-3xl shadow-lg shadow-sky-500/30 mb-6">
+                    <i class="fa-solid fa-flask-vial"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold tracking-tight mb-3">Ionic Naming Challenge</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-base mb-6 leading-relaxed">
+                    Test your understanding of naming binary ionic compounds, variable charge transition metals (Roman Numerals), and polyatomic ions!
+                </p>
+
+                <div class="grid grid-cols-3 gap-3 mb-8 text-left">
+                    <div class="bg-sky-50 dark:bg-slate-900/80 p-3 rounded-xl border border-sky-100 dark:border-slate-800">
+                        <div class="text-sky-600 dark:text-sky-400 font-bold text-lg">10</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Questions</div>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-slate-900/80 p-3 rounded-xl border border-indigo-100 dark:border-slate-800">
+                        <div class="text-indigo-600 dark:text-indigo-400 font-bold text-lg">Instant</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Explanations</div>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-slate-900/80 p-3 rounded-xl border border-emerald-100 dark:border-slate-800">
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold text-lg">Streak</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Bonus Points</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="startQuiz('mixed')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-base shadow-lg shadow-sky-500/25 transition-all transform active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-play mr-2"></i> Start 10-Question Quiz
+                    </button>
+                    <button onclick="switchTab('reference')" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-base transition">
+                        <i class="fa-solid fa-book mr-2"></i> Review Rules First
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Main Playing Area (Hidden by default) -->
+            <div id="quiz-active" class="hidden max-w-3xl mx-auto">
+                <!-- Top Progress Bar & Stats -->
+                <div class="mb-6 bg-white/70 dark:bg-slate-900/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="w-full sm:w-1/2">
+                        <div class="flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+                            <span id="progress-text">Question 1 of 10</span>
+                            <span id="progress-percent">10%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                            <div id="progress-bar" class="bg-gradient-to-r from-sky-500 to-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center">
+                            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Score</div>
+                            <div id="score-display" class="text-xl font-extrabold text-sky-600 dark:text-sky-400">0</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Streak</div>
+                            <div id="streak-display" class="text-xl font-extrabold text-amber-500 flex items-center justify-center">
+                                🔥 <span>0</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Timer</div>
+                            <div id="timer-display" class="text-xl font-mono font-bold text-slate-700 dark:text-slate-300">00:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div id="question-card" class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all duration-300">
+                    <!-- Question Category Badge -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span id="question-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                            Binary Ionic Compounds
+                        </span>
+                        <span id="question-difficulty" class="text-xs font-semibold text-slate-400">
+                            Level: Standard
+                        </span>
+                    </div>
+
+                    <!-- Question Prompt -->
+                    <div class="mb-6">
+                        <h3 id="question-prompt" class="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-100 leading-snug">
+                            What is the correct IUPAC name for the given chemical compound?
+                        </h3>
+                        <div class="mt-4 p-6 rounded-2xl bg-slate-900 text-white dark:bg-slate-950 text-center shadow-inner border border-slate-800">
+                            <span id="question-formula" class="chemical-formula text-3xl sm:text-4xl font-mono font-bold tracking-wider text-sky-400">
+                                NaCl
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Choices Options List -->
+                    <div id="choices-container" class="grid grid-cols-1 gap-3 mb-6">
+                        <!-- Dynamic choices generated by JS -->
+                    </div>
+
+                    <!-- Feedback Banner (Hidden until answer selected) -->
+                    <div id="feedback-panel" class="hidden rounded-xl p-5 mb-6 transition-all duration-300 border">
+                        <div class="flex items-start space-x-3">
+                            <div id="feedback-icon" class="text-2xl mt-0.5"></div>
+                            <div class="flex-1">
+                                <h4 id="feedback-title" class="text-base font-bold mb-1"></h4>
+                                <p id="feedback-explanation" class="text-sm leading-relaxed text-slate-700 dark:text-slate-300"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Question Action Button -->
+                    <div class="flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-md transition transform active:scale-95 items-center">
+                            <span>Next Question</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Results View (Shown upon completion) -->
+            <div id="quiz-results" class="hidden glass-card rounded-2xl p-6 sm:p-10 shadow-2xl max-w-2xl mx-auto text-center">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-white flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl shadow-amber-500/20">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <h2 class="text-3xl font-extrabold mb-2">Quiz Completed!</h2>
+                <p id="result-message" class="text-slate-600 dark:text-slate-300 text-sm mb-6">You've mastered ionic compound naming!</p>
+
+                <!-- Final Stats Grid -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="bg-slate-100 dark:bg-slate-800/80 p-4 rounded-xl">
+                        <div class="text-2xl font-extrabold text-sky-600 dark:text-sky-400" id="final-score">0/10</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Final Score</div>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800/80 p-4 rounded-xl">
+                        <div class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400" id="final-accuracy">0%</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Accuracy</div>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800/80 p-4 rounded-xl">
+                        <div class="text-2xl font-extrabold text-amber-500" id="final-streak">0</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Best Streak</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="startQuiz('mixed')" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-sm shadow-md hover:from-sky-600 hover:to-indigo-700 transition">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Retake New Quiz
+                    </button>
+                    <button onclick="switchTab('sandbox')" class="px-6 py-3.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition">
+                        <i class="fa-solid fa-atom mr-2"></i> Practice in Builder
+                    </button>
+                </div>
+
+                <!-- Question Breakdown Accordion -->
+                <div class="mt-8 text-left border-t border-slate-200 dark:border-slate-800 pt-6">
+                    <h3 class="font-bold text-base mb-4 flex items-center justify-between">
+                        <span>Detailed Question Review</span>
+                        <span class="text-xs font-normal text-slate-500">Review your choices below</span>
+                    </h3>
+                    <div id="results-breakdown" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- VIEW 2: COMPOUND BUILDER SANDBOX -->
+        <section id="view-sandbox" class="hidden w-full max-w-4xl mx-auto transition-all duration-300">
+            <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-atom"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Interactive Ionic Compound Builder</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Select a cation and anion to see how charges balance and form the correct formula and name.</p>
+                    </div>
+                </div>
+
+                <!-- Builder Grid Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Cation Column -->
+                    <div class="bg-blue-50/50 dark:bg-slate-900/60 p-5 rounded-2xl border border-blue-100 dark:border-slate-800">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-3">
+                            1. Select Cation (Positive Ion)
+                        </label>
+                        <select id="sandbox-cation" onchange="updateSandbox()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+                            <optgroup label="Main Group Cations">
+                                <option value="Na+">Sodium (Na⁺)</option>
+                                <option value="K+">Potassium (K⁺)</option>
+                                <option value="Mg2+">Magnesium (Mg²⁺)</option>
+                                <option value="Ca2+">Calcium (Ca²⁺)</option>
+                                <option value="Al3+">Aluminum (Al³⁺)</option>
+                            </optgroup>
+                            <optgroup label="Transition Metal Cations">
+                                <option value="Fe2+">Iron(II) (Fe²⁺)</option>
+                                <option value="Fe3+">Iron(III) (Fe³⁺)</option>
+                                <option value="Cu+">Copper(I) (Cu⁺)</option>
+                                <option value="Cu2+">Copper(II) (Cu²⁺)</option>
+                                <option value="Pb4+">Lead(IV) (Pb⁴⁺)</option>
+                            </optgroup>
+                            <optgroup label="Polyatomic Cations">
+                                <option value="NH4+">Ammonium (NH₄⁺)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Anion Column -->
+                    <div class="bg-pink-50/50 dark:bg-slate-900/60 p-5 rounded-2xl border border-pink-100 dark:border-slate-800">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-3">
+                            2. Select Anion (Negative Ion)
+                        </label>
+                        <select id="sandbox-anion" onchange="updateSandbox()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-pink-500 outline-none">
+                            <optgroup label="Monatomic Anions">
+                                <option value="Cl-">Chloride (Cl⁻)</option>
+                                <option value="O2-">Oxide (O²⁻)</option>
+                                <option value="N3-">Nitride (N³⁻)</option>
+                                <option value="F-">Fluoride (F⁻)</option>
+                                <option value="S2-">Sulfide (S²⁻)</option>
+                            </optgroup>
+                            <optgroup label="Polyatomic Anions">
+                                <option value="NO3-">Nitrate (NO₃⁻)</option>
+                                <option value="SO42-">Sulfate (SO₄²⁻)</option>
+                                <option value="PO43-">Phosphate (PO₄³⁻)</option>
+                                <option value="CO32-">Carbonate (CO₃²⁻)</option>
+                                <option value="OH-">Hydroxide (OH⁻)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Result & Charge Balancing Output -->
+                <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <div class="text-xs uppercase text-slate-400 font-semibold mb-1">Resulting Chemical Formula</div>
+                            <div id="sandbox-formula-output" class="chemical-formula text-3xl sm:text-4xl font-mono font-extrabold text-sky-400 mb-3">
+                                NaCl
+                            </div>
+                            <div class="text-xs uppercase text-slate-400 font-semibold mb-1">IUPAC Name</div>
+                            <div id="sandbox-name-output" class="text-xl font-bold text-amber-400">
+                                Sodium chloride
+                            </div>
+                        </div>
+
+                        <!-- Step By Step Charge Balance Visual -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono space-y-2">
+                            <div class="text-slate-400 font-bold border-b border-slate-800 pb-1 mb-2">⚡ Charge Balance Calculation</div>
+                            <div id="sandbox-cation-calc" class="text-blue-400">Cation Charge: +1 × 1 = +1</div>
+                            <div id="sandbox-anion-calc" class="text-pink-400">Anion Charge: -1 × 1 = -1</div>
+                            <div class="text-emerald-400 font-bold pt-1 border-t border-slate-800" id="sandbox-net-calc">
+                                Net Charge: (+1) + (-1) = 0 (Balanced!)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: CHEAT SHEET & REFERENCE GUIDE -->
+        <section id="view-reference" class="hidden w-full max-w-4xl mx-auto transition-all duration-300">
+            <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">Ionic Naming Cheat Sheet</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Essential rules and polyatomic ions list for fast study.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Rules Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-slate-100 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div class="font-bold text-sky-600 dark:text-sky-400 text-sm mb-1">1. Binary Compounds</div>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Name the cation (metal) first, then the anion with the ending changed to <strong>-ide</strong> (e.g., Sodium Chlor<strong>ide</strong>).
+                        </p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div class="font-bold text-indigo-600 dark:text-indigo-400 text-sm mb-1">2. Transition Metals</div>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Use <strong>Roman Numerals</strong> in parentheses for metals with variable oxidation states (e.g., Iron(III) Oxide for Fe²⁺ vs Fe³⁺).
+                        </p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div class="font-bold text-pink-600 dark:text-pink-400 text-sm mb-1">3. Polyatomic Ions</div>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Keep the specific name of polyatomic ions as-is (e.g., CaSO₄ = Calcium Sulf<strong>ate</strong>, not sulfide).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Polyatomic Ion Table -->
+                <h3 class="font-bold text-base mb-3 text-slate-800 dark:text-slate-200">Common Polyatomic Ions Reference Table</h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
+                            <tr>
+                                <th class="p-3">Formula</th>
+                                <th class="p-3">Name</th>
+                                <th class="p-3">Charge</th>
+                                <th class="p-3">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-sky-600 dark:text-sky-400 chemical-formula">NH₄⁺</td>
+                                <td class="p-3 font-sans font-medium">Ammonium</td>
+                                <td class="p-3 text-blue-500">+1</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Cation</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">NO₃⁻</td>
+                                <td class="p-3 font-sans font-medium">Nitrate</td>
+                                <td class="p-3 text-pink-500">-1</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">NO₂⁻</td>
+                                <td class="p-3 font-sans font-medium">Nitrite</td>
+                                <td class="p-3 text-pink-500">-1</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion (-ite has 1 less O)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">OH⁻</td>
+                                <td class="p-3 font-sans font-medium">Hydroxide</td>
+                                <td class="p-3 text-pink-500">-1</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Anion</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">SO₄²⁻</td>
+                                <td class="p-3 font-sans font-medium">Sulfate</td>
+                                <td class="p-3 text-pink-500">-2</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">CO₃²⁻</td>
+                                <td class="p-3 font-sans font-medium">Carbonate</td>
+                                <td class="p-3 text-pink-500">-2</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">PO₄³⁻</td>
+                                <td class="p-3 font-sans font-medium">Phosphate</td>
+                                <td class="p-3 text-pink-500">-3</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                                <td class="p-3 font-bold text-pink-600 dark:text-pink-400 chemical-formula">Cr₂O₇²⁻</td>
+                                <td class="p-3 font-sans font-medium">Dichromate</td>
+                                <td class="p-3 text-pink-500">-2</td>
+                                <td class="p-3 font-sans text-xs text-slate-500">Oxyanion</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+        Ionic Quest — Interactive Chemistry Learning Tool &copy; 2026
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Web Audio API Sound Effects Engine (No external asset dependencies)
+        let soundEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy chord chime
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'wrong') {
+                // Low buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'complete') {
+                // Fanfare chord
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'triangle';
+                    subOsc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.connect(subGain);
+                    subGain.gain.setValueAtTime(0.15, now + i * 0.08);
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+                    subOsc.start(now + i * 0.08);
+                    subOsc.stop(now + i * 0.08 + 0.4);
+                });
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            }
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-sun text-amber-400';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        // Question Bank for Ionic Compounds
+        const questionBank = [
+            {
+                id: 1,
+                formula: "NaCl",
+                correct: "Sodium chloride",
+                options: ["Sodium chloride", "Sodium chlorine", "Monosodium monochloride", "Sodium chlorate"],
+                category: "Simple Binary Ionic",
+                explanation: "In simple binary ionic compounds, name the cation first (Sodium), then the anion with the ending changed to -ide (Chlorine becomes Chloride). Do not use Greek prefixes like 'mono-' for ionic compounds!"
+            },
+            {
+                id: 2,
+                formula: "Fe₂O₃",
+                correct: "Iron(III) oxide",
+                options: ["Iron(III) oxide", "Iron(II) oxide", "Diiron trioxide", "Iron trioxide"],
+                category: "Transition Metals (Roman Numerals)",
+                explanation: "Oxygen has a -2 charge (total -6 for 3 oxygens). To balance this, the 2 iron ions must total +6, meaning each iron ion is Fe³⁺. Therefore, it is named Iron(III) oxide using Roman numeral III."
+            },
+            {
+                id: 3,
+                formula: "Mg(NO₃)₂",
+                correct: "Magnesium nitrate",
+                options: ["Magnesium nitrate", "Magnesium nitrite", "Magnesium dinitrate", "Magnesium nitrogen trioxide"],
+                category: "Polyatomic Ions",
+                explanation: "Mg²⁺ is Magnesium. NO₃⁻ is the polyatomic anion Nitrate. Since Magnesium has a fixed +2 charge, no Roman numeral is needed. The name is simply Magnesium nitrate."
+            },
+            {
+                id: 4,
+                formula: "CuSO₄",
+                correct: "Copper(II) sulfate",
+                options: ["Copper(II) sulfate", "Copper(I) sulfate", "Copper sulfide", "Copper tetrasulfate"],
+                category: "Transition Metal + Polyatomic",
+                explanation: "Sulfate (SO₄²⁻) has a -2 charge. To balance one sulfate, the single copper ion must be Cu²⁺. Hence, it is Copper(II) sulfate."
+            },
+            {
+                id: 5,
+                formula: "(NH₄)₂CO₃",
+                correct: "Ammonium carbonate",
+                options: ["Ammonium carbonate", "Ammonium carbon trioxide", "Diammonium carbonate", "Nitrogen hydrogen carbonate"],
+                category: "Polyatomic + Polyatomic",
+                explanation: "NH₄⁺ is Ammonium and CO₃²⁻ is Carbonate. Two +1 ammonium ions balance one -2 carbonate ion. The name is Ammonium carbonate."
+            },
+            {
+                id: 6,
+                formula: "Al₂O₃",
+                correct: "Aluminum oxide",
+                options: ["Aluminum oxide", "Aluminum(III) oxide", "Dialuminum trioxide", "Aluminum trioxide"],
+                category: "Main Group Metal",
+                explanation: "Aluminum is a main group metal in Group 13 and always forms a +3 cation (Al³⁺). Because its charge is fixed, Roman numerals are NOT used. It is simply Aluminum oxide."
+            },
+            {
+                id: 7,
+                formula: "PbO₂",
+                correct: "Lead(IV) oxide",
+                options: ["Lead(IV) oxide", "Lead(II) oxide", "Lead dioxide", "Monolead oxide"],
+                category: "Post-Transition Metal",
+                explanation: "Each oxygen ion is O²⁻ (total -4 charge). The single lead ion must have a +4 charge (Pb⁴⁺) to balance. Thus, the IUPAC name is Lead(IV) oxide."
+            },
+            {
+                id: 8,
+                formula: "Ca₃(PO₄)₂",
+                correct: "Calcium phosphate",
+                options: ["Calcium phosphate", "Calcium phosphite", "Tricalcium diphosphate", "Calcium(II) phosphate"],
+                category: "Polyatomic Ions",
+                explanation: "Ca²⁺ is Calcium and PO₄³⁻ is Phosphate. Three +2 calcium ions (+6) balance two -3 phosphate ions (-6). Calcium has a fixed charge, so no Roman numeral is needed: Calcium phosphate."
+            },
+            {
+                id: 9,
+                formula: "K₂Cr₂O₇",
+                correct: "Potassium dichromate",
+                options: ["Potassium dichromate", "Potassium chromate", "Dipotassium dichromate", "Potassium chromium heptoxide"],
+                category: "Polyatomic Ions",
+                explanation: "K⁺ is Potassium and Cr₂O₇²⁻ is the polyatomic ion Dichromate. Combining two K⁺ ions with one Cr₂O₇²⁻ ion yields Potassium dichromate."
+            },
+            {
+                id: 10,
+                formula: "TiCl₄",
+                correct: "Titanium(IV) chloride",
+                options: ["Titanium(IV) chloride", "Titanium chloride", "Titanium tetrachloride", "Titanium(I) chloride"],
+                category: "Transition Metals",
+                explanation: "Four chloride ions (Cl⁻) contribute a total charge of -4. Titanium must be in the +4 oxidation state (Ti⁴⁺). Therefore, it is Titanium(IV) chloride."
+            }
+        ];
+
+        // Quiz State Management
+        let currentQuestions = [];
+        let currentIdx = 0;
+        let score = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let userAnswers = [];
+        let answeredCurrent = false;
+
+        function startQuiz() {
+            // Shuffle and pick 10 questions from bank
+            currentQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 10);
+            
+            // Shuffle choices for each question
+            currentQuestions.forEach(q => {
+                q.shuffledOptions = [...q.options].sort(() => 0.5 - Math.random());
+            });
+
+            currentIdx = 0;
+            score = 0;
+            streak = 0;
+            bestStreak = 0;
+            secondsElapsed = 0;
+            userAnswers = [];
+
+            // UI Reset
+            document.getElementById('quiz-welcome').classList.add('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+
+            updateStatsDisplay();
+            startTimer();
+            renderQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function formatFormulaHTML(formulaStr) {
+            // Converts e.g. Fe2O3 or Ca3(PO4)2 into html sub tags
+            return formulaStr.replace(/([A-Za-z\)\(]+)(\d+)/g, '$1<sub>$2</sub>');
+        }
+
+        function renderQuestion() {
+            answeredCurrent = false;
+            const q = currentQuestions[currentIdx];
+
+            // Progress
+            const progressPct = Math.round(((currentIdx + 1) / currentQuestions.length) * 100);
+            document.getElementById('progress-text').innerText = `Question ${currentIdx + 1} of ${currentQuestions.length}`;
+            document.getElementById('progress-percent').innerText = `${progressPct}%`;
+            document.getElementById('progress-bar').style.width = `${progressPct}%`;
+
+            // Question info
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-formula').innerHTML = formatFormulaHTML(q.formula);
+
+            // Hide feedback & next button
+            const feedbackPanel = document.getElementById('feedback-panel');
+            feedbackPanel.classList.add('hidden');
+            feedbackPanel.className = 'hidden rounded-xl p-5 mb-6 transition-all duration-300 border';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Render Choices
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+
+            q.shuffledOptions.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `choice-btn w-full text-left p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 hover:bg-sky-50 dark:hover:bg-slate-800 hover:border-sky-300 dark:hover:border-sky-700 transition font-medium text-slate-800 dark:text-slate-200 flex items-center justify-between group cursor-pointer`;
+                btn.onclick = () => selectAnswer(opt, btn);
+
+                btn.innerHTML = `
+                    <span class="flex items-center">
+                        <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center mr-3 group-hover:bg-sky-500 group-hover:text-white transition">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>${opt}</span>
+                    </span>
+                    <i class="fa-regular fa-circle text-slate-300 dark:text-slate-700 group-hover:text-sky-500 text-lg transition"></i>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(selectedOption, clickedBtn) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const q = currentQuestions[currentIdx];
+            const isCorrect = (selectedOption === q.correct);
+
+            // Record user answer
+            userAnswers.push({
+                question: q,
+                selected: selectedOption,
+                isCorrect: isCorrect
+            });
+
+            // Disable all choice buttons and highlight
+            const buttons = document.querySelectorAll('.choice-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-sky-50', 'hover:border-sky-300', 'cursor-pointer');
+                
+                const optText = btn.querySelector('span > span:last-child').innerText;
+                const icon = btn.querySelector('i');
+
+                if (optText === q.correct) {
+                    btn.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+                    icon.className = 'fa-solid fa-circle-check text-emerald-500 text-lg';
+                } else if (optText === selectedOption && !isCorrect) {
+                    btn.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-500', 'text-rose-800', 'dark:text-rose-300');
+                    icon.className = 'fa-solid fa-circle-xmark text-rose-500 text-lg';
+                }
+            });
+
+            // Score & Streak
+            const card = document.getElementById('question-card');
+            if (isCorrect) {
+                score++;
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+                playSound('correct');
+                card.classList.add('pulse-correct');
+                setTimeout(() => card.classList.remove('pulse-correct'), 500);
+            } else {
+                streak = 0;
+                playSound('wrong');
+                card.classList.add('pulse-wrong');
+                setTimeout(() => card.classList.remove('pulse-wrong'), 500);
+            }
+
+            updateStatsDisplay();
+            showFeedback(isCorrect, q);
+
+            // Reveal Next Button
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('flex');
+        }
+
+        function showFeedback(isCorrect, q) {
+            const panel = document.getElementById('feedback-panel');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const exp = document.getElementById('feedback-explanation');
+
+            panel.classList.remove('hidden');
+
+            if (isCorrect) {
+                panel.className = 'rounded-xl p-5 mb-6 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200';
+                icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
+                title.innerText = 'Correct! Great Job!';
+            } else {
+                panel.className = 'rounded-xl p-5 mb-6 bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200';
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-500"></i>';
+                title.innerText = `Incorrect. Correct answer: ${q.correct}`;
+            }
+
+            exp.innerHTML = q.explanation;
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('streak-display').querySelector('span').innerText = streak;
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < currentQuestions.length) {
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            playSound('complete');
+
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+
+            const pct = Math.round((score / currentQuestions.length) * 100);
+            document.getElementById('final-score').innerText = `${score}/${currentQuestions.length}`;
+            document.getElementById('final-accuracy').innerText = `${pct}%`;
+            document.getElementById('final-streak').innerText = `${bestStreak} 🔥`;
+
+            const msg = document.getElementById('result-message');
+            if (pct === 100) {
+                msg.innerText = "🏆 Perfect Score! You are an IUPAC Naming Master Chemist!";
+                triggerConfetti();
+            } else if (pct >= 80) {
+                msg.innerText = "🌟 Excellent Work! You have a solid grasp of ionic nomenclature.";
+            } else if (pct >= 60) {
+                msg.innerText = "👍 Good Effort! Review transition metals and polyatomic ions to level up.";
+            } else {
+                msg.innerText = "📚 Keep practicing! Check out the Ion Cheat Sheet and Try Again.";
+            }
+
+            // Build Breakdown list
+            const breakdown = document.getElementById('results-breakdown');
+            breakdown.innerHTML = '';
+
+            userAnswers.forEach((ans, i) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border text-xs ${ans.isCorrect ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800' : 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800'}`;
+                item.innerHTML = `
+                    <div class="flex items-center justify-between font-bold mb-1">
+                        <span>Q${i+1}: <span class="chemical-formula font-mono">${formatFormulaHTML(ans.question.formula)}</span></span>
+                        <span class="${ans.isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">
+                            ${ans.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                        </span>
+                    </div>
+                    <div class="text-slate-600 dark:text-slate-300">
+                        Your answer: <span class="font-semibold">${ans.selected}</span>
+                    </div>
+                    ${!ans.isCorrect ? `<div class="text-emerald-700 dark:text-emerald-400 font-semibold mt-0.5">Correct: ${ans.question.correct}</div>` : ''}
+                `;
+                breakdown.appendChild(item);
+            });
+        }
+
+        // Compound Builder Sandbox Logic
+        const ionsData = {
+            "Na+": { name: "Sodium", charge: 1, text: "Na⁺" },
+            "K+": { name: "Potassium", charge: 1, text: "K⁺" },
+            "Mg2+": { name: "Magnesium", charge: 2, text: "Mg²⁺" },
+            "Ca2+": { name: "Calcium", charge: 2, text: "Ca²⁺" },
+            "Al3+": { name: "Aluminum", charge: 3, text: "Al³⁺" },
+            "Fe2+": { name: "Iron(II)", charge: 2, text: "Fe²⁺" },
+            "Fe3+": { name: "Iron(III)", charge: 3, text: "Fe³⁺" },
+            "Cu+": { name: "Copper(I)", charge: 1, text: "Cu⁺" },
+            "Cu2+": { name: "Copper(II)", charge: 2, text: "Cu²⁺" },
+            "Pb4+": { name: "Lead(IV)", charge: 4, text: "Pb⁴⁺" },
+            "NH4+": { name: "Ammonium", charge: 1, text: "NH₄⁺", polyatomic: true, raw: "NH4" },
+
+            "Cl-": { name: "chloride", charge: -1, text: "Cl⁻", raw: "Cl" },
+            "O2-": { name: "oxide", charge: -2, text: "O²⁻", raw: "O" },
+            "N3-": { name: "nitride", charge: -3, text: "N³⁻", raw: "N" },
+            "F-": { name: "fluoride", charge: -1, text: "F⁻", raw: "F" },
+            "S2-": { name: "sulfide", charge: -2, text: "S²⁻", raw: "S" },
+            "NO3-": { name: "nitrate", charge: -1, text: "NO₃⁻", polyatomic: true, raw: "NO3" },
+            "SO42-": { name: "sulfate", charge: -2, text: "SO₄²⁻", polyatomic: true, raw: "SO4" },
+            "PO43-": { name: "phosphate", charge: -3, text: "PO₄³⁻", polyatomic: true, raw: "PO4" },
+            "CO32-": { name: "carbonate", charge: -2, text: "CO₃²⁻", polyatomic: true, raw: "CO3" },
+            "OH-": { name: "hydroxide", charge: -1, text: "OH⁻", polyatomic: true, raw: "OH" }
+        };
+
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function updateSandbox() {
+            const catKey = document.getElementById('sandbox-cation').value;
+            const aniKey = document.getElementById('sandbox-anion').value;
+
+            const cation = ionsData[catKey];
+            const anion = ionsData[aniKey];
+
+            const catCharge = cation.charge;
+            const aniCharge = Math.abs(anion.charge);
+
+            // Simplify ratio
+            const common = gcd(catCharge, aniCharge);
+            const numCations = aniCharge / common;
+            const numAnions = catCharge / common;
+
+            // Build Chemical Formula String
+            let catPart = cation.raw || catKey.replace(/\d*\+/, '');
+            if (cation.polyatomic && numCations > 1) {
+                catPart = `(${catPart})`;
+            }
+            if (numCations > 1) catPart += numCations;
+
+            let aniPart = anion.raw || aniKey.replace(/\d*\-/, '');
+            if (anion.polyatomic && numAnions > 1) {
+                aniPart = `(${aniPart})`;
+            }
+            if (numAnions > 1) aniPart += numAnions;
+
+            const formula = catPart + aniPart;
+            const fullName = `${cation.name} ${anion.name}`;
+
+            // Render Output
+            document.getElementById('sandbox-formula-output').innerHTML = formatFormulaHTML(formula);
+            document.getElementById('sandbox-name-output').innerText = fullName;
+
+            // Calculations UI
+            document.getElementById('sandbox-cation-calc').innerText = `Cation Charge: +${catCharge} × ${numCations} = +${catCharge * numCations}`;
+            document.getElementById('sandbox-anion-calc').innerText = `Anion Charge: -${aniCharge} × ${numAnions} = -${aniCharge * numAnions}`;
+            document.getElementById('sandbox-net-calc').innerText = `Net Charge: (+${catCharge * numCations}) + (-${aniCharge * numAnions}) = 0 (Neutral Compound!)`;
+        }
+
+        // Confetti Generator
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.7) * 12,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 100
+                });
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    if (p.life > 0) {
+                        alive = true;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.2; // Gravity
+                        p.life--;
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                if (alive) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            animateConfetti();
+        }
+
+        // Tab Navigation Switcher
+        function switchTab(tab) {
+            ['quiz', 'sandbox', 'reference'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                
+                // Desktop navs
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    navBtn.className = 'tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400';
+                }
+
+                // Mobile navs
+                const mobBtn = document.getElementById(`mob-nav-${t}`);
+                if (mobBtn) {
+                    mobBtn.className = 'flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400';
+                }
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${tab}`);
+            if (activeNav) {
+                activeNav.className = 'tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm';
+            }
+
+            const activeMob = document.getElementById(`mob-nav-${tab}`);
+            if (activeMob) {
+                activeMob.className = 'flex-1 py-2 text-center text-xs font-semibold text-sky-600 dark:text-sky-400';
+            }
+
+            if (tab === 'sandbox') {
+                updateSandbox();
+            }
+        }
+
+        // Window load initialization
+        window.onload = function() {
+            // Default setup
+            updateSandbox();
+        };
+    </script>
+</body>
+</html>
